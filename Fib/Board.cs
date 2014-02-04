@@ -13,17 +13,34 @@ namespace Fib
         private List<GridPosition> BlockPositions;
         private Vector3 GridSize;
         private Vector2 Offset;
-        private Rectangle Block;
-        private Texture2D Tile;
+        public static Rectangle SpriteCoords;
+        public static Texture2D TileSheet;
 
-        public Board()
+        public Board(Vector2 Position)
         {
             BlockPositions = new List<GridPosition>();
-            GridSize.X = 10;
-            GridSize.Y = 20;
+            GridSize.X = 12;
+            GridSize.Y = 21;
             GridSize.Z = 16;
-            Offset.X = 0;
-            Offset.Y = 0;
+            Offset.X = Position.X;
+            Offset.Y = Position.Y;
+            GenerateWell();
+        }
+
+        public void GenerateWell()
+        {
+            for (int x = 0; x <= GridSize.X; x++)
+            {
+                for (int y = 0; y <= GridSize.Y; y++)
+                {
+                    if (x == 0
+                        || x == GridSize.X
+                        || y == GridSize.Y)
+                    {
+                        BlockPositions.Add(new GridPosition(x, y));
+                    }
+                }
+            }
         }
 
         public bool Update(GameTime gameTime)
@@ -36,13 +53,26 @@ namespace Fib
         {
             for (int i = BlockPositions.Count - 1; i >= 0; i--)
             {
-                spriteBatch.Draw(Tile, new Vector2(BlockPositions[i].X * GridSize.Z, BlockPositions[i].Y * GridSize.Z), Block, BlockPositions[i].Color);
+                spriteBatch.Draw(TileSheet, new Vector2((BlockPositions[i].X * GridSize.Z) + Offset.X, (BlockPositions[i].Y * GridSize.Z) + Offset.Y), SpriteCoords, BlockPositions[i].Color);
             }
         }
 
-        public bool Collides(Vector2 Position)
+        // returns true if there is any overlap
+        public bool Collides(List<GridPosition> Positions)
         {
-            if (BlockPositions.Exists(x => x.X == Position.X && x.Y == Position.Y))
+            int MaxY = 0;
+            foreach (GridPosition Position in Positions)
+            {
+                MaxY = (Position.Y > MaxY) ? Position.Y : MaxY;
+
+                /*if (BlockPositions.Exists(x => x.X == Position.X && x.Y == Position.Y))
+                {
+                    return true;
+                }*/
+            }
+
+            // check for piece moving beyond bounds
+            if (MaxY >= GridSize.Y)
             {
                 return true;
             }
@@ -52,9 +82,19 @@ namespace Fib
             }
         }
 
-        public void Lock(Tetromino Piece)
+        public void Consume(List<GridPosition> Positions)
         {
+            BlockPositions = BlockPositions.Concat(Positions).ToList();
+        }
 
+        public Vector2 Position()
+        {
+            return Offset;
+        }
+
+        public Vector2 PreviewPosition()
+        {
+            return new Vector2(Offset.X + (GridSize.X * GridSize.Z), Offset.Y + (GridSize.Y * GridSize.Z));
         }
     }
 }

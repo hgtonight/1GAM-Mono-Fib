@@ -9,46 +9,49 @@ namespace Fib
 {
     class Tetromino
     {
+        public static Texture2D TileSheet = null;
+        public static Rectangle SpriteCoords = new Rectangle(0, 0, 16, 16);
+        public static int TileSize = 16;
         private List<GridPosition> BlockPositions;
-        private int TileSize;
-        private Vector2 Position;
-        private bool FastFall;
-        private Texture2D TileSheet;
-        private Rectangle SpriteCoords;
-
-        public Tetromino()
-        {
-            BlockPositions = new List<GridPosition>();
-            Position = new Vector2(4,0);
-            FastFall = false;
-            TileSize = 16;
-        }
+        private Vector2 BoardPosition;
+        private bool FastFall, Falling;
 
         public Tetromino(List<GridPosition> list)
         {
             BlockPositions = list;
-            Position = new Vector2(4,0);
+            BoardPosition = new Vector2(4, 0);
             FastFall = false;
-            TileSize = 16;
+            Falling = true;
         }
 
-        public void LoadContent(Texture2D tileSheet)
+        public void March()
         {
-            TileSheet = tileSheet;
-            SpriteCoords = new Rectangle(0, 16, 16, 16);
+            if (Falling)
+            {
+                BoardPosition.Y++;
+            }
         }
 
-        public void Update(GameTime gameTime)
+        public void Retreat()
         {
-
+            BoardPosition.Y--;
         }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 Offset)
         {
             for (int i = BlockPositions.Count - 1; i >= 0; i--)
             {
-                spriteBatch.Draw(TileSheet, new Vector2(BlockPositions[i].X * TileSize, BlockPositions[i].Y * TileSize), SpriteCoords, BlockPositions[i].Color);
+                spriteBatch.Draw(TileSheet, new Vector2(
+                                                (BlockPositions[i].X * TileSize) + (BoardPosition.X * TileSize) + Offset.X,
+                                                (BlockPositions[i].Y * TileSize) + (BoardPosition.Y * TileSize) + Offset.Y
+                                                ), SpriteCoords, BlockPositions[i].Color);
             }
+        }
+
+        public void Position(Vector2 Position)
+        {
+            BoardPosition.X = Position.X;
+            BoardPosition.Y = Position.Y;
         }
 
         public void RotateCW()
@@ -64,6 +67,55 @@ namespace Fib
         public void Drop()
         {
             FastFall = true;
+        }
+
+        public List<GridPosition> Blocks()
+        {
+            List<GridPosition> Blocks = new List<GridPosition>();
+            foreach (GridPosition Block in BlockPositions) {
+                GridPosition Temp = new GridPosition(Block.X + (int)BoardPosition.X, Block.Y + (int)BoardPosition.Y, Block.Color);
+                Blocks.Add(Temp);
+            }
+
+            return Blocks;
+        }
+
+        public static Tetromino NextPiece(uint random = 0)
+        {
+            if (random == 0)
+            {
+                Random r = new Random();
+                random = (uint)r.Next(0, 6);
+            }
+
+            random = random % 7;
+
+            switch (random)
+            {
+                default:
+                case 0:
+                    return Tetromino.I();
+                    break;
+                case 1:
+                    return Tetromino.O();
+                    break;
+                case 2:
+                    return Tetromino.T();
+                    break;
+                case 3:
+                    return Tetromino.J();
+                    break;
+                case 4:
+                    return Tetromino.L();
+                    break;
+                case 5:
+                    return Tetromino.S();
+                    break;
+                case 6:
+                    return Tetromino.Z();
+                    break;
+            }
+            
         }
 
         /* The standard pieces */

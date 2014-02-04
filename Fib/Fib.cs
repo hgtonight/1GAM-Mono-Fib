@@ -16,27 +16,24 @@ namespace Fib
     /// </summary>
     public class Fib : Game
     {
+        static int Ticks = 0;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
+        Vector2 BoardPosition;
         Board Board;
-        List<Tetromino> Pieces;
+        Tetromino Piece, PreviewPiece;
+        int GameSpeed;
 
         public Fib()
             : base()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
-            Board = new Board();
-            Pieces = new List<Tetromino>();
-            Pieces.Add(Tetromino.I());
-            Pieces.Add(Tetromino.O());
-            Pieces.Add(Tetromino.T());
-            Pieces.Add(Tetromino.L());
-            Pieces.Add(Tetromino.J());
-            Pieces.Add(Tetromino.S());
-            Pieces.Add(Tetromino.Z());
+            Board = new Board(new Vector2(100, 20));
+            GameSpeed = 20;
+            Piece = Tetromino.NextPiece();
+            PreviewPiece = Tetromino.NextPiece();
         }
 
         /// <summary>
@@ -60,12 +57,16 @@ namespace Fib
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            TileSheet = Content.Load<Texture2D>("sprites");
+            TileSheet = Content.Load<Texture2D>("tiles");
 
-            foreach (Tetromino Piece in Pieces)
-            {
-                Piece.LoadContent(TileSheet);
-            }
+            // Set up static members of tetrominos
+            Tetromino.TileSheet = TileSheet;
+            Tetromino.TileSize = 16;
+            Tetromino.SpriteCoords = new Rectangle(16, 16, 16, 16);
+
+            // Set up static members of the board
+            Board.TileSheet = TileSheet;
+            Board.SpriteCoords = new Rectangle(0, 0, 16, 16);
         }
 
         /// <summary>
@@ -84,10 +85,53 @@ namespace Fib
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            Ticks++;
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            {
+                Piece.MoveLeft(Board.);
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            {
+                Piece.MoveRight();
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                Piece.RotateCW();
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+            {
+                Piece.RotateCCW();
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            {
+                Piece.Drop();
+            }
+
+            // Gravity only happens some of the time
+            if (Ticks % GameSpeed == 0)
+            {
+                Piece.March();
+                Ticks = 0;
+            }
+
+            // If piece collides with the board
+            if (Board.Collides(Piece.Blocks()))
+            {
+                Piece.Retreat();
+                //Board.Consume(Piece.Blocks());
+                //Piece = PreviewPiece;
+                //PreviewPiece = Tetromino.NextPiece();
+            }
+
+            Board.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -103,10 +147,9 @@ namespace Fib
             spriteBatch.Begin();
             Board.Draw(gameTime, spriteBatch);
 
-            foreach (Tetromino Piece in Pieces)
-            {
-                Piece.Draw(gameTime, spriteBatch);
-            }
+            Piece.Draw(gameTime, spriteBatch, Board.Position());
+            PreviewPiece.Draw(gameTime, spriteBatch, Board.PreviewPosition());
+
             spriteBatch.End();
 
             base.Draw(gameTime);
