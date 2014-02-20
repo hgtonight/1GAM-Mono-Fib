@@ -19,8 +19,8 @@ namespace Fib
         public Board(Vector2 Position)
         {
             BlockPositions = new List<GridPosition>();
-            GridSize.X = 12;
-            GridSize.Y = 21;
+            GridSize.X = 10;
+            GridSize.Y = 20;
             GridSize.Z = 16;
             Offset.X = Position.X;
             Offset.Y = Position.Y;
@@ -29,13 +29,13 @@ namespace Fib
 
         public void GenerateWell()
         {
-            for (int x = 0; x <= GridSize.X; x++)
+            for (int x = 0; x <= GridSize.X + 1; x++)
             {
                 for (int y = 0; y <= GridSize.Y; y++)
                 {
                     if (x == 0
-                        || x == GridSize.X
-                        || y == GridSize.Y)
+                        || x > GridSize.X
+                        || y >= GridSize.Y)
                     {
                         BlockPositions.Add(new GridPosition(x, y));
                     }
@@ -65,10 +65,10 @@ namespace Fib
             {
                 MaxY = (Position.Y > MaxY) ? Position.Y : MaxY;
 
-                /*if (BlockPositions.Exists(x => x.X == Position.X && x.Y == Position.Y))
+                if (BlockPositions.Exists(x => x.X == Position.X && x.Y == Position.Y))
                 {
                     return true;
-                }*/
+                }
             }
 
             // check for piece moving beyond bounds
@@ -95,6 +95,11 @@ namespace Fib
         public Vector2 PreviewPosition()
         {
             return new Vector2(Offset.X + (GridSize.X * GridSize.Z), Offset.Y + (GridSize.Y * GridSize.Z));
+        }
+
+        public void RemoveCompletedLines()
+        {
+            // Search the entire board looking for full lines
         }
     }
 }

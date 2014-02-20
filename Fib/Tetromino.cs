@@ -12,16 +12,28 @@ namespace Fib
         public static Texture2D TileSheet = null;
         public static Rectangle SpriteCoords = new Rectangle(0, 0, 16, 16);
         public static int TileSize = 16;
-        private List<GridPosition> BlockPositions;
+        private List<List<GridPosition>> BlockPositions;
+        private int RotationState;
         private Vector2 BoardPosition;
         private bool FastFall, Falling;
 
-        public Tetromino(List<GridPosition> list)
+        public Tetromino(List<List<GridPosition>> list)
         {
             BlockPositions = list;
             BoardPosition = new Vector2(4, 0);
             FastFall = false;
             Falling = true;
+            RotationState = 0;
+        }
+
+        public void MoveLeft()
+        {
+            BoardPosition.X--;
+        }
+
+        public void MoveRight()
+        {
+            BoardPosition.X++;
         }
 
         public void March()
@@ -39,12 +51,12 @@ namespace Fib
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Vector2 Offset)
         {
-            for (int i = BlockPositions.Count - 1; i >= 0; i--)
+            for (int i = BlockPositions[RotationState].Count - 1; i >= 0; i--)
             {
                 spriteBatch.Draw(TileSheet, new Vector2(
-                                                (BlockPositions[i].X * TileSize) + (BoardPosition.X * TileSize) + Offset.X,
-                                                (BlockPositions[i].Y * TileSize) + (BoardPosition.Y * TileSize) + Offset.Y
-                                                ), SpriteCoords, BlockPositions[i].Color);
+                                                (this.BlockPositions[RotationState][i].X * TileSize) + (BoardPosition.X * TileSize) + Offset.X,
+                                                (this.BlockPositions[RotationState][i].Y * TileSize) + (BoardPosition.Y * TileSize) + Offset.Y
+                                                ), SpriteCoords, BlockPositions[RotationState][i].Color);
             }
         }
 
@@ -56,12 +68,20 @@ namespace Fib
 
         public void RotateCW()
         {
-
+            RotationState++;
+            if (RotationState >= BlockPositions.Count)
+            {
+                RotationState = 0;
+            }
         }
 
         public void RotateCCW()
         {
-
+            RotationState--;
+            if (RotationState < 0)
+            {
+                RotationState = BlockPositions.Count - 1;
+            }
         }
 
         public void Drop()
@@ -69,10 +89,15 @@ namespace Fib
             FastFall = true;
         }
 
+        public bool FastFalling()
+        {
+            return FastFall;
+        }
+
         public List<GridPosition> Blocks()
         {
             List<GridPosition> Blocks = new List<GridPosition>();
-            foreach (GridPosition Block in BlockPositions) {
+            foreach (GridPosition Block in BlockPositions[RotationState]) {
                 GridPosition Temp = new GridPosition(Block.X + (int)BoardPosition.X, Block.Y + (int)BoardPosition.Y, Block.Color);
                 Blocks.Add(Temp);
             }
@@ -121,78 +146,190 @@ namespace Fib
         /* The standard pieces */
         public static Tetromino I()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.Cyan;
-            List.Add(new GridPosition(0, 3, Color));
-            List.Add(new GridPosition(1, 3, Color));
-            List.Add(new GridPosition(2, 3, Color));
-            List.Add(new GridPosition(3, 3, Color));
+
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            Piece.Add(new GridPosition(3, 2, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(1, 0, Color));
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            List.Add(Piece); 
+            
             return new Tetromino(List);
         }
 
         public static Tetromino O()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.Yellow;
-            List.Add(new GridPosition(1, 2, Color));
-            List.Add(new GridPosition(1, 3, Color));
-            List.Add(new GridPosition(2, 2, Color));
-            List.Add(new GridPosition(2, 3, Color));
+
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            Piece.Add(new GridPosition(2, 3, Color));
+            List.Add(Piece);
+
             return new Tetromino(List);
         }
 
         public static Tetromino T()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.DarkMagenta;
-            List.Add(new GridPosition(0, 2, Color));
-            List.Add(new GridPosition(1, 2, Color));
-            List.Add(new GridPosition(2, 2, Color));
-            List.Add(new GridPosition(1, 3, Color));
+
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            List.Add(Piece); 
+            
             return new Tetromino(List);
         }
 
         public static Tetromino J()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.Blue;
-            List.Add(new GridPosition(0, 2, Color));
-            List.Add(new GridPosition(1, 2, Color));
-            List.Add(new GridPosition(2, 2, Color));
-            List.Add(new GridPosition(2, 3, Color));
+            
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            Piece.Add(new GridPosition(2, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>(); 
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(0, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 1, Color));
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(2, 1, Color));
+            List.Add(Piece);
+
             return new Tetromino(List);
         }
 
         public static Tetromino L()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.Orange;
-            List.Add(new GridPosition(0, 2, Color));
-            List.Add(new GridPosition(1, 2, Color));
-            List.Add(new GridPosition(2, 2, Color));
-            List.Add(new GridPosition(0, 3, Color));
+            
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            Piece.Add(new GridPosition(0, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 1, Color));
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            Piece.Add(new GridPosition(2, 1, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(2, 3, Color));
+            List.Add(Piece);
+            
             return new Tetromino(List);
         }
 
         public static Tetromino S()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.Lime;
-            List.Add(new GridPosition(0, 3, Color));
-            List.Add(new GridPosition(1, 3, Color));
-            List.Add(new GridPosition(1, 2, Color));
-            List.Add(new GridPosition(2, 2, Color));
+            
+            Piece.Add(new GridPosition(0, 3, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(2, 2, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 1, Color));
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            List.Add(Piece);
+
             return new Tetromino(List);
         }
 
         public static Tetromino Z()
         {
-            List<GridPosition> List = new List<GridPosition>();
+            List<List<GridPosition>> List = new List<List<GridPosition>>();
+            List<GridPosition> Piece = new List<GridPosition>();
             Color Color = Color.Red;
-            List.Add(new GridPosition(0, 2, Color));
-            List.Add(new GridPosition(1, 2, Color));
-            List.Add(new GridPosition(1, 3, Color));
-            List.Add(new GridPosition(2, 3, Color));
+
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            Piece.Add(new GridPosition(1, 3, Color));
+            Piece.Add(new GridPosition(2, 3, Color));
+            List.Add(Piece);
+
+            Piece = new List<GridPosition>();
+            Piece.Add(new GridPosition(0, 2, Color));
+            Piece.Add(new GridPosition(0, 3, Color));
+            Piece.Add(new GridPosition(1, 1, Color));
+            Piece.Add(new GridPosition(1, 2, Color));
+            List.Add(Piece);
+
             return new Tetromino(List);
         }
     }

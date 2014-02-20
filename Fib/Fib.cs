@@ -21,6 +21,7 @@ namespace Fib
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
         Vector2 BoardPosition;
+        KeyboardState PreviousKeyState;
         Board Board;
         Tetromino Piece, PreviewPiece;
         int GameSpeed;
@@ -31,7 +32,7 @@ namespace Fib
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             Board = new Board(new Vector2(100, 20));
-            GameSpeed = 20;
+            GameSpeed = 60;
             Piece = Tetromino.NextPiece();
             PreviewPiece = Tetromino.NextPiece();
         }
@@ -85,38 +86,57 @@ namespace Fib
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState CurrentKeyState = Keyboard.GetState();
             Ticks++;
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            if (CurrentKeyState.IsKeyDown(Keys.Escape) && !PreviousKeyState.IsKeyDown(Keys.Escape))
             {
-                Piece.MoveLeft(Board.);
+                // Exit in the future
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            if (CurrentKeyState.IsKeyDown(Keys.Left) && !PreviousKeyState.IsKeyDown(Keys.Left))
+            {
+                Piece.MoveLeft();
+                if (Board.Collides(Piece.Blocks()))
+                {
+                    Piece.MoveRight();
+                }
+            }
+
+            if (CurrentKeyState.IsKeyDown(Keys.Right) && !PreviousKeyState.IsKeyDown(Keys.Right))
             {
                 Piece.MoveRight();
+                if (Board.Collides(Piece.Blocks()))
+                {
+                    Piece.MoveLeft();
+                }
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            if (CurrentKeyState.IsKeyDown(Keys.Up) && !PreviousKeyState.IsKeyDown(Keys.Up))
             {
                 Piece.RotateCW();
+                if (Board.Collides(Piece.Blocks()))
+                {
+                    Piece.RotateCCW();
+                }
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+            if (CurrentKeyState.IsKeyDown(Keys.Down) && !PreviousKeyState.IsKeyDown(Keys.Down))
             {
                 Piece.RotateCCW();
+                if (Board.Collides(Piece.Blocks()))
+                {
+                    Piece.RotateCW();
+                }
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
+            if (CurrentKeyState.IsKeyDown(Keys.Space) && !PreviousKeyState.IsKeyDown(Keys.Space))
             {
                 Piece.Drop();
             }
 
             // Gravity only happens some of the time
-            if (Ticks % GameSpeed == 0)
+            if (Ticks % GameSpeed == 0 || Piece.FastFalling())
             {
                 Piece.March();
                 Ticks = 0;
@@ -126,14 +146,17 @@ namespace Fib
             if (Board.Collides(Piece.Blocks()))
             {
                 Piece.Retreat();
-                //Board.Consume(Piece.Blocks());
-                //Piece = PreviewPiece;
-                //PreviewPiece = Tetromino.NextPiece();
+                Board.Consume(Piece.Blocks());
+                Piece = PreviewPiece;
+                PreviewPiece = Tetromino.NextPiece();
+
+                Board.RemoveCompletedLines();
             }
 
             Board.Update(gameTime);
 
             base.Update(gameTime);
+            PreviousKeyState = CurrentKeyState;
         }
 
         /// <summary>
