@@ -25,6 +25,7 @@ namespace Fib
         Board Board;
         Tetromino Piece, PreviewPiece;
         int GameSpeed;
+        bool GameOver;
 
         public Fib()
             : base()
@@ -33,6 +34,7 @@ namespace Fib
             Content.RootDirectory = "Content";
             Board = new Board(new Vector2(100, 20));
             GameSpeed = 60;
+            GameOver = false;
             Piece = Tetromino.NextPiece();
             PreviewPiece = Tetromino.NextPiece();
         }
@@ -86,8 +88,58 @@ namespace Fib
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            KeyboardState CurrentKeyState = Keyboard.GetState();
+            if (GameOver)
+            {
+                HandleMenuInput();
+            }
+            else
+            {
+                HandleUserInput();
+                UpdateGameState();
+                CheckForGameEnd();
+            }
+
+            base.Update(gameTime);
+        }
+
+        private void CheckForGameEnd()
+        {
+            if (Board.IsFull())
+            {
+                GameOver = true;
+            }
+        }
+
+        private void UpdateGameState()
+        {
             Ticks++;
+            // Gravity only happens some of the time
+            if (Ticks % GameSpeed == 0 || Piece.FastFalling())
+            {
+                Piece.March();
+                Ticks = 0;
+            }
+
+            // If piece collides with the board
+            if (Board.Collides(Piece.Blocks()))
+            {
+                Piece.Retreat();
+                Board.Consume(Piece.Blocks());
+                Piece = PreviewPiece;
+                PreviewPiece = Tetromino.NextPiece();
+                Board.RemoveCompletedLines();
+            }
+
+        }
+
+        private void HandleMenuInput()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void HandleUserInput()
+        {
+            KeyboardState CurrentKeyState = Keyboard.GetState();
 
             if (CurrentKeyState.IsKeyDown(Keys.Escape) && !PreviousKeyState.IsKeyDown(Keys.Escape))
             {
@@ -135,27 +187,6 @@ namespace Fib
                 Piece.Drop();
             }
 
-            // Gravity only happens some of the time
-            if (Ticks % GameSpeed == 0 || Piece.FastFalling())
-            {
-                Piece.March();
-                Ticks = 0;
-            }
-
-            // If piece collides with the board
-            if (Board.Collides(Piece.Blocks()))
-            {
-                Piece.Retreat();
-                Board.Consume(Piece.Blocks());
-                Piece = PreviewPiece;
-                PreviewPiece = Tetromino.NextPiece();
-
-                Board.RemoveCompletedLines();
-            }
-
-            Board.Update(gameTime);
-
-            base.Update(gameTime);
             PreviousKeyState = CurrentKeyState;
         }
 

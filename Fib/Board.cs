@@ -10,7 +10,7 @@ namespace Fib
 {
     class Board
     {
-        private List<GridPosition> BlockPositions;
+        private List<GridPosition> BorderPositions, BlockPositions;
         private Vector3 GridSize;
         private Vector2 Offset;
         public static Rectangle SpriteCoords;
@@ -18,6 +18,7 @@ namespace Fib
 
         public Board(Vector2 Position)
         {
+            BorderPositions = new List<GridPosition>();
             BlockPositions = new List<GridPosition>();
             GridSize.X = 10;
             GridSize.Y = 20;
@@ -37,20 +38,19 @@ namespace Fib
                         || x > GridSize.X
                         || y >= GridSize.Y)
                     {
-                        BlockPositions.Add(new GridPosition(x, y));
+                        BorderPositions.Add(new GridPosition(x, y));
                     }
                 }
             }
         }
 
-        public bool Update(GameTime gameTime)
-        {
-           // check for completed lines
-            return true;
-        }
-
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            for (int i = BorderPositions.Count - 1; i >= 0; i--)
+            {
+                spriteBatch.Draw(TileSheet, new Vector2((BorderPositions[i].X * GridSize.Z) + Offset.X, (BorderPositions[i].Y * GridSize.Z) + Offset.Y), SpriteCoords, BorderPositions[i].Color);
+            }
+
             for (int i = BlockPositions.Count - 1; i >= 0; i--)
             {
                 spriteBatch.Draw(TileSheet, new Vector2((BlockPositions[i].X * GridSize.Z) + Offset.X, (BlockPositions[i].Y * GridSize.Z) + Offset.Y), SpriteCoords, BlockPositions[i].Color);
@@ -60,26 +60,25 @@ namespace Fib
         // returns true if there is any overlap
         public bool Collides(List<GridPosition> Positions)
         {
-            int MaxY = 0;
             foreach (GridPosition Position in Positions)
             {
-                MaxY = (Position.Y > MaxY) ? Position.Y : MaxY;
+                if (Position.X <= 0 || Position.X > GridSize.X)
+                {
+                    return true;
+                }
 
                 if (BlockPositions.Exists(x => x.X == Position.X && x.Y == Position.Y))
                 {
                     return true;
                 }
+                
+                if (BorderPositions.Exists(x => x.X == Position.X && x.Y == Position.Y))
+                {
+                    return true;
+                }
             }
 
-            // check for piece moving beyond bounds
-            if (MaxY >= GridSize.Y)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         public void Consume(List<GridPosition> Positions)
@@ -99,7 +98,55 @@ namespace Fib
 
         public void RemoveCompletedLines()
         {
+            List<int> LinesToRemove = new List<int>();
+
             // Search the entire board looking for full lines
+            for (int y = 1; y < GridSize.Y; y++)
+            {
+                for (int x = 1; x <= GridSize.X; x++)
+                {
+                    if (!BlockPositions.Exists(i => i.X == x && i.Y == y))
+                    {
+                        break;
+                    }
+
+                    if (x == GridSize.X)
+                    {
+                        LinesToRemove.Add(y);
+                    }
+                }
+            }
+
+            if (LinesToRemove.Count > 0)
+            {
+                // Do Stuff
+                foreach (int Y in LinesToRemove)
+                {
+                    // Remove all blocks with that Y
+                    BlockPositions.RemoveAll(i => i.Y == Y);
+
+                    // Increase the Y position of all blocks < that Y
+                    BlockPositions.ForEach(delegate(GridPosition Position)
+                    {
+                        if (Position.Y < Y)
+                        {
+                            Position.Y++;
+                        }
+                    });
+                }
+            }
+        }
+
+        public bool IsFull()
+        {
+            if (BlockPositions.Exists(i => i.Y == 0))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

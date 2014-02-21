@@ -20,7 +20,7 @@ namespace Fib
         public Tetromino(List<List<GridPosition>> list)
         {
             BlockPositions = list;
-            BoardPosition = new Vector2(4, 0);
+            BoardPosition = new Vector2(4, -3);
             FastFall = false;
             Falling = true;
             RotationState = 0;
