@@ -13,7 +13,7 @@ namespace Fib
         private List<GridPosition> BorderPositions, BlockPositions;
         private Vector3 GridSize;
         private Vector2 Offset;
-        public static Rectangle SpriteCoords;
+        public static Rectangle WallSprite, BlockSprite;
         public static Texture2D TileSheet;
 
         public Board(Vector2 Position)
@@ -48,12 +48,12 @@ namespace Fib
         {
             for (int i = BorderPositions.Count - 1; i >= 0; i--)
             {
-                spriteBatch.Draw(TileSheet, new Vector2((BorderPositions[i].X * GridSize.Z) + Offset.X, (BorderPositions[i].Y * GridSize.Z) + Offset.Y), SpriteCoords, BorderPositions[i].Color);
+                spriteBatch.Draw(TileSheet, new Vector2((BorderPositions[i].X * GridSize.Z) + Offset.X, (BorderPositions[i].Y * GridSize.Z) + Offset.Y), WallSprite, BorderPositions[i].Color);
             }
 
             for (int i = BlockPositions.Count - 1; i >= 0; i--)
             {
-                spriteBatch.Draw(TileSheet, new Vector2((BlockPositions[i].X * GridSize.Z) + Offset.X, (BlockPositions[i].Y * GridSize.Z) + Offset.Y), SpriteCoords, BlockPositions[i].Color);
+                spriteBatch.Draw(TileSheet, new Vector2((BlockPositions[i].X * GridSize.Z) + Offset.X, (BlockPositions[i].Y * GridSize.Z) + Offset.Y), BlockSprite, BlockPositions[i].Color);
             }
         }
 

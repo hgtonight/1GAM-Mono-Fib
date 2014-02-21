@@ -110,7 +110,7 @@ namespace Fib
             if (random == 0)
             {
                 Random r = new Random();
-                random = (uint)r.Next(0, 6);
+                random = (uint)r.Next(0, 7);
             }
 
             random = random % 7;

@@ -69,7 +69,8 @@ namespace Fib
 
             // Set up static members of the board
             Board.TileSheet = TileSheet;
-            Board.SpriteCoords = new Rectangle(0, 0, 16, 16);
+            Board.WallSprite = new Rectangle(0, 0, 16, 16);
+            Board.BlockSprite = new Rectangle(16, 0, 16, 16);
         }
 
         /// <summary>
