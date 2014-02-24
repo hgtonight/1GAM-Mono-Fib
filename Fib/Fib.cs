@@ -165,7 +165,7 @@ namespace Fib
                 }
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.Up) && !PreviousKeyState.IsKeyDown(Keys.Up))
+            if (CurrentKeyState.IsKeyDown(Keys.LeftControl) && !PreviousKeyState.IsKeyDown(Keys.LeftControl))
             {
                 Piece.RotateCW();
                 if (Board.Collides(Piece.Blocks()))
@@ -174,7 +174,7 @@ namespace Fib
                 }
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.Down) && !PreviousKeyState.IsKeyDown(Keys.Down))
+            if (CurrentKeyState.IsKeyDown(Keys.LeftAlt) && !PreviousKeyState.IsKeyDown(Keys.LeftAlt))
             {
                 Piece.RotateCCW();
                 if (Board.Collides(Piece.Blocks()))
@@ -186,6 +186,11 @@ namespace Fib
             if (CurrentKeyState.IsKeyDown(Keys.Space) && !PreviousKeyState.IsKeyDown(Keys.Space))
             {
                 Piece.Drop();
+            }
+
+            if (CurrentKeyState.IsKeyDown(Keys.Down))
+            {
+                Piece.SoftDrop();
             }
 
             PreviousKeyState = CurrentKeyState;

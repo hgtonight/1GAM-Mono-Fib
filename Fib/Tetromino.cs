@@ -15,13 +15,14 @@ namespace Fib
         private List<List<GridPosition>> BlockPositions;
         private int RotationState;
         private Vector2 BoardPosition;
-        private bool FastFall, Falling;
+        private bool HardFastFall, SoftFastFall, Falling;
 
         public Tetromino(List<List<GridPosition>> list)
         {
             BlockPositions = list;
             BoardPosition = new Vector2(4, -3);
-            FastFall = false;
+            HardFastFall = false;
+            SoftFastFall = false;
             Falling = true;
             RotationState = 0;
         }
@@ -42,6 +43,7 @@ namespace Fib
             {
                 BoardPosition.Y++;
             }
+            SoftFastFall = false;
         }
 
         public void Retreat()
@@ -86,12 +88,17 @@ namespace Fib
 
         public void Drop()
         {
-            FastFall = true;
+            HardFastFall = true;
+        }
+
+        public void SoftDrop()
+        {
+            SoftFastFall = true;
         }
 
         public bool FastFalling()
         {
-            return FastFall;
+            return (HardFastFall || SoftFastFall) ? true : false;
         }
 
         public List<GridPosition> Blocks()
