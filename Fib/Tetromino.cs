@@ -150,6 +150,26 @@ namespace Fib
             
         }
 
+        /* Create a tracer tetromino that only has the current rotation state copied into it */
+        public Tetromino Tracer()
+        {
+            List<List<GridPosition>> BlockList = new List<List<GridPosition>>();
+            List<GridPosition> Blocks = new List<GridPosition>();
+
+            // Clone 
+            foreach(GridPosition Block in this.BlockPositions[this.RotationState]) {
+                Blocks.Add(new GridPosition(Block.X, Block.Y, Color.White * 0.25f));
+            }
+
+            BlockList.Add(Blocks);
+
+            Tetromino Ghost = new Tetromino(BlockList);
+
+            Ghost.Position(this.BoardPosition);
+
+            return Ghost;
+        }
+
         /* The standard pieces */
         public static Tetromino I()
         {

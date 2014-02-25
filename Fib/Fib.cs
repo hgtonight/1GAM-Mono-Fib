@@ -20,10 +20,9 @@ namespace Fib
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
-        Vector2 BoardPosition;
         KeyboardState PreviousKeyState;
         Board Board;
-        Tetromino Piece, PreviewPiece;
+        Tetromino Piece, GhostPiece, PreviewPiece;
         int GameSpeed;
         bool GameOver;
 
@@ -36,6 +35,7 @@ namespace Fib
             GameSpeed = 60;
             GameOver = false;
             Piece = Tetromino.NextPiece();
+            GhostPiece = Piece.Tracer();
             PreviewPiece = Tetromino.NextPiece();
         }
 
@@ -131,6 +131,12 @@ namespace Fib
                 Board.RemoveCompletedLines();
             }
 
+            // Update the ghost piece
+            GhostPiece = Piece.Tracer();
+            while(!Board.Collides(GhostPiece.Blocks())) {
+                GhostPiece.March();
+            }
+            GhostPiece.Retreat();
         }
 
         private void HandleMenuInput()
@@ -208,6 +214,7 @@ namespace Fib
             Board.Draw(gameTime, spriteBatch);
 
             Piece.Draw(gameTime, spriteBatch, Board.Position());
+            GhostPiece.Draw(gameTime, spriteBatch, Board.Position());
             PreviewPiece.Draw(gameTime, spriteBatch, Board.PreviewPosition());
 
             spriteBatch.End();
