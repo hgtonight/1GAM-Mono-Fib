@@ -66,6 +66,9 @@
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\PressStart2P.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Content\tiles.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

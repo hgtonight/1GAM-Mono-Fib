@@ -96,7 +96,7 @@ namespace Fib
             return new Vector2(Offset.X + (GridSize.X * GridSize.Z), Offset.Y + (GridSize.Y * GridSize.Z));
         }
 
-        public void RemoveCompletedLines()
+        public int RemoveCompletedLines()
         {
             List<int> LinesToRemove = new List<int>();
 
@@ -135,6 +135,8 @@ namespace Fib
                     });
                 }
             }
+
+            return LinesToRemove.Count;
         }
 
         public bool IsFull()

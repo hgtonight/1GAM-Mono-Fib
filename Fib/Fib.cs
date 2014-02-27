@@ -20,10 +20,11 @@ namespace Fib
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
+        SpriteFont Font;
         KeyboardState PreviousKeyState;
         Board Board;
         Tetromino Piece, GhostPiece, PreviewPiece;
-        int GameSpeed;
+        int GameSpeed, Score, Level;
         bool GameOver;
 
         public Fib()
@@ -33,6 +34,8 @@ namespace Fib
             Content.RootDirectory = "Content";
             Board = new Board(new Vector2(100, 20));
             GameSpeed = 60;
+            Score = 0;
+            Level = 0;
             GameOver = false;
             Piece = Tetromino.NextPiece();
             GhostPiece = Piece.Tracer();
@@ -61,6 +64,7 @@ namespace Fib
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             TileSheet = Content.Load<Texture2D>("tiles");
+            Font = Content.Load<SpriteFont>("PressStart2P");
 
             // Set up static members of tetrominos
             Tetromino.TileSheet = TileSheet;
@@ -113,22 +117,49 @@ namespace Fib
 
         private void UpdateGameState()
         {
+            bool FastFall = Piece.FastFalling();
             Ticks++;
+
             // Gravity only happens some of the time
-            if (Ticks % GameSpeed == 0 || Piece.FastFalling())
+            if (Ticks % GameSpeed == 0 || FastFall)
             {
                 Piece.March();
                 Ticks = 0;
+
+                // Reward dropping based on position
+                if (FastFall)
+                {
+                    Score++;
+                }
             }
 
             // If piece collides with the board
             if (Board.Collides(Piece.Blocks()))
             {
+                // Remove one point since we have to retreat
+                Score--;
                 Piece.Retreat();
                 Board.Consume(Piece.Blocks());
                 Piece = PreviewPiece;
                 PreviewPiece = Tetromino.NextPiece();
-                Board.RemoveCompletedLines();
+                switch (Board.RemoveCompletedLines())
+                {
+                    case 4:
+                        Score += 1200 * (Level + 1);
+                        break;
+                    case 3:
+                        Score += 300 * (Level + 1);
+                        break;
+                    case 2:
+                        Score += 100 * (Level + 1);
+                        break;
+                    case 1:
+                        Score += 40 * (Level + 1);
+                        break;
+                    default:
+                    case 0:
+                        break;
+                }
             }
 
             // Update the ghost piece
@@ -217,6 +248,9 @@ namespace Fib
             GhostPiece.Draw(gameTime, spriteBatch, Board.Position());
             PreviewPiece.Draw(gameTime, spriteBatch, Board.PreviewPosition());
 
+            // Draw the HUD
+            spriteBatch.DrawString(Font, "Score", new Vector2(300, 20), Color.White);
+            spriteBatch.DrawString(Font, Score.ToString(), new Vector2(300, 40), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
