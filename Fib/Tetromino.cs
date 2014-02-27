@@ -29,12 +29,18 @@ namespace Fib
 
         public void MoveLeft()
         {
-            BoardPosition.X--;
+            if (!HardFastFall)
+            {
+                BoardPosition.X--;
+            }
         }
 
         public void MoveRight()
         {
-            BoardPosition.X++;
+            if (!HardFastFall)
+            {
+                BoardPosition.X++;
+            }
         }
 
         public void March()
@@ -70,19 +76,25 @@ namespace Fib
 
         public void RotateCW()
         {
-            RotationState++;
-            if (RotationState >= BlockPositions.Count)
+            if (!HardFastFall)
             {
-                RotationState = 0;
+                RotationState++;
+                if (RotationState >= BlockPositions.Count)
+                {
+                    RotationState = 0;
+                }
             }
         }
 
         public void RotateCCW()
         {
-            RotationState--;
-            if (RotationState < 0)
+            if (!HardFastFall)
             {
-                RotationState = BlockPositions.Count - 1;
+                RotationState--;
+                if (RotationState < 0)
+                {
+                    RotationState = BlockPositions.Count - 1;
+                }
             }
         }
 
