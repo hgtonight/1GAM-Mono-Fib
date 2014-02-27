@@ -137,8 +137,6 @@ namespace Fib
             // If piece collides with the board
             if (Board.Collides(Piece.Blocks()))
             {
-                // Remove one point since we have to retreat
-                Score--;
                 Piece.Retreat();
                 Board.Consume(Piece.Blocks());
                 Piece = PreviewPiece;
@@ -256,6 +254,13 @@ namespace Fib
             // Draw the HUD
             spriteBatch.DrawString(Font, "Score", new Vector2(300, 20), Color.White);
             spriteBatch.DrawString(Font, Score.ToString(), new Vector2(300, 40), Color.White);
+
+            spriteBatch.DrawString(Font, "Lines", new Vector2(300, 70), Color.White);
+            spriteBatch.DrawString(Font, LinesCleared.ToString(), new Vector2(300, 90), Color.White);
+
+            spriteBatch.DrawString(Font, "Level", new Vector2(300, 120), Color.White);
+            spriteBatch.DrawString(Font, Level.ToString(), new Vector2(300, 140), Color.White);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
