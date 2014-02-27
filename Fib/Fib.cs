@@ -24,6 +24,7 @@ namespace Fib
         KeyboardState CurrentKeyState, PreviousKeyState;
         Board Board;
         Tetromino Piece, GhostPiece, PreviewPiece;
+        Tetromino[] StatPieces;
         int GameSpeed, Score, Level, LinesCleared;
         bool GameOver;
 
@@ -32,12 +33,13 @@ namespace Fib
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            Board = new Board(new Vector2(100, 20));
+            Board = new Board(new Vector2(180, 32));
             Score = 0;
             LinesCleared = 0;
             Level = 0;
             GameSpeed = CalculateGameSpeed(Level);
             GameOver = false;
+            StatPieces = Tetromino.PieceList();
             Piece = Tetromino.NextPiece();
             GhostPiece = Piece.Tracer();
             PreviewPiece = Tetromino.NextPiece();
@@ -281,19 +283,32 @@ namespace Fib
             Piece.Draw(gameTime, spriteBatch, Board.Position());
             PreviewPiece.Draw(gameTime, spriteBatch, Board.PreviewPosition());
 
-            // Draw the HUD
-            spriteBatch.DrawString(Font, "Score", new Vector2(300, 20), Color.White);
-            spriteBatch.DrawString(Font, Score.ToString(), new Vector2(300, 40), Color.White);
-
-            spriteBatch.DrawString(Font, "Lines", new Vector2(300, 70), Color.White);
-            spriteBatch.DrawString(Font, LinesCleared.ToString(), new Vector2(300, 90), Color.White);
-
-            spriteBatch.DrawString(Font, "Level", new Vector2(300, 120), Color.White);
-            spriteBatch.DrawString(Font, Level.ToString(), new Vector2(300, 140), Color.White);
+            DrawHud();
+            DrawTetrominoStats(gameTime);
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void DrawHud()
+        {
+            spriteBatch.DrawString(Font, "Score", new Vector2(380, 32), Color.White);
+            spriteBatch.DrawString(Font, Score.ToString(), new Vector2(512 - Font.MeasureString(Score.ToString()).X, 52), Color.White);
+
+            spriteBatch.DrawString(Font, "Lines", new Vector2(380, 82), Color.White);
+            spriteBatch.DrawString(Font, LinesCleared.ToString(), new Vector2(512 - Font.MeasureString(LinesCleared.ToString()).X, 102), Color.White);
+
+            spriteBatch.DrawString(Font, "Level", new Vector2(380, 132), Color.White);
+            spriteBatch.DrawString(Font, Level.ToString(), new Vector2(512 - Font.MeasureString(Level.ToString()).X, 152), Color.White);
+        }
+
+        private void DrawTetrominoStats(GameTime gameTime)
+        {
+            for(int i = 0; i < Tetromino.Stats.Length; i++) {
+                spriteBatch.DrawString(Font, Tetromino.Stats[i].ToString(), new Vector2(172 - Font.MeasureString(Tetromino.Stats[i].ToString()).X, i * 50 + 32), Color.White);
+                StatPieces[i].Draw(gameTime, spriteBatch, new Vector2(-32, i * 50 + 48));
+            }
         }
 
         public bool KeyPressed(Keys Key)

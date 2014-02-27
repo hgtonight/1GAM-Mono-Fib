@@ -11,6 +11,7 @@ namespace Fib
     {
         public static Texture2D TileSheet = null;
         public static Rectangle SpriteCoords = new Rectangle(0, 0, 16, 16);
+        public static int[] Stats = {0, 0, 0, 0, 0, 0, 0};
         public static int TileSize = 16;
         private List<List<GridPosition>> BlockPositions;
         private int RotationState;
@@ -133,6 +134,9 @@ namespace Fib
             }
 
             random = random % 7;
+
+            // Keep track of next piece selection
+            Stats[random]++;
 
             switch (random)
             {
@@ -370,6 +374,21 @@ namespace Fib
             List.Add(Piece);
 
             return new Tetromino(List);
+        }
+
+        public static Tetromino[] PieceList()
+        {
+            Tetromino[] List = { null, null, null, null, null, null, null };
+
+            List[0] = Tetromino.I();
+            List[1] = Tetromino.O();
+            List[2] = Tetromino.T();
+            List[3] = Tetromino.J();
+            List[4] = Tetromino.L();
+            List[5] = Tetromino.S();
+            List[6] = Tetromino.Z();
+
+            return List;
         }
     }
 }
