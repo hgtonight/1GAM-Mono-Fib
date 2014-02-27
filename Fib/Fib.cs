@@ -33,10 +33,10 @@ namespace Fib
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             Board = new Board(new Vector2(100, 20));
-            GameSpeed = 60;
             Score = 0;
-            Level = 0;
             LinesCleared = 0;
+            Level = 0;
+            GameSpeed = CalculateGameSpeed(Level);
             GameOver = false;
             Piece = Tetromino.NextPiece();
             GhostPiece = Piece.Tracer();
@@ -165,12 +165,42 @@ namespace Fib
                 }
             }
 
+            // Look for change in level
+            if (Math.Floor((decimal)(LinesCleared / 10)) != Level)
+            {
+                Level++;
+                GameSpeed = CalculateGameSpeed(Level);
+            }
+
             // Update the ghost piece
             GhostPiece = Piece.Tracer();
             while(!Board.Collides(GhostPiece.Blocks())) {
                 GhostPiece.March();
             }
             GhostPiece.Retreat();
+        }
+
+        /**
+         * Returns a gamespeed based on level that matches NES Tetris's apparent implementation
+         */
+        private int CalculateGameSpeed(int lvl)
+        {
+            if (lvl >= 0 && lvl <= 8)
+            {
+                return (48 - (lvl * 5));
+            }
+            else if (lvl >= 0 && lvl <= 9)
+            {
+                return 6;
+            }
+            else if (lvl >=0 && lvl <= 28)
+            {
+                return 5 - (int)(Math.Floor((decimal)(lvl - 10) / 3));
+            }
+            else
+            {
+                return 1;
+            }
         }
 
         private void HandleMenuInput()
