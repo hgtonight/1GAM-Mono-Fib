@@ -24,7 +24,7 @@ namespace Fib
         KeyboardState PreviousKeyState;
         Board Board;
         Tetromino Piece, GhostPiece, PreviewPiece;
-        int GameSpeed, Score, Level;
+        int GameSpeed, Score, Level, LinesCleared;
         bool GameOver;
 
         public Fib()
@@ -36,6 +36,7 @@ namespace Fib
             GameSpeed = 60;
             Score = 0;
             Level = 0;
+            LinesCleared = 0;
             GameOver = false;
             Piece = Tetromino.NextPiece();
             GhostPiece = Piece.Tracer();
@@ -146,15 +147,19 @@ namespace Fib
                 {
                     case 4:
                         Score += 1200 * (Level + 1);
+                        LinesCleared += 4;
                         break;
                     case 3:
                         Score += 300 * (Level + 1);
+                        LinesCleared += 3;
                         break;
                     case 2:
                         Score += 100 * (Level + 1);
+                        LinesCleared += 2;
                         break;
                     case 1:
                         Score += 40 * (Level + 1);
+                        LinesCleared += 1;
                         break;
                     default:
                     case 0:
@@ -244,8 +249,8 @@ namespace Fib
             spriteBatch.Begin();
             Board.Draw(gameTime, spriteBatch);
 
-            Piece.Draw(gameTime, spriteBatch, Board.Position());
             GhostPiece.Draw(gameTime, spriteBatch, Board.Position());
+            Piece.Draw(gameTime, spriteBatch, Board.Position());
             PreviewPiece.Draw(gameTime, spriteBatch, Board.PreviewPosition());
 
             // Draw the HUD
