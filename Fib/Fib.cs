@@ -21,7 +21,7 @@ namespace Fib
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
         SpriteFont Font;
-        KeyboardState PreviousKeyState;
+        KeyboardState CurrentKeyState, PreviousKeyState;
         Board Board;
         Tetromino Piece, GhostPiece, PreviewPiece;
         int GameSpeed, Score, Level, LinesCleared;
@@ -180,14 +180,14 @@ namespace Fib
 
         private void HandleUserInput()
         {
-            KeyboardState CurrentKeyState = Keyboard.GetState();
+            CurrentKeyState = Keyboard.GetState();
 
-            if (CurrentKeyState.IsKeyDown(Keys.Escape) && !PreviousKeyState.IsKeyDown(Keys.Escape))
+            if (KeyPressed(Keys.Escape) || KeyPressed(Keys.P) || KeyPressed(Keys.F1))
             {
-                // Exit in the future
+                // Pause in the future
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.Left) && !PreviousKeyState.IsKeyDown(Keys.Left))
+            if (KeyPressed(Keys.Left) || KeyPressed(Keys.NumPad4))
             {
                 Piece.MoveLeft();
                 if (Board.Collides(Piece.Blocks()))
@@ -196,7 +196,7 @@ namespace Fib
                 }
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.Right) && !PreviousKeyState.IsKeyDown(Keys.Right))
+            if (KeyPressed(Keys.Right) || KeyPressed(Keys.NumPad6))
             {
                 Piece.MoveRight();
                 if (Board.Collides(Piece.Blocks()))
@@ -205,7 +205,7 @@ namespace Fib
                 }
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.LeftControl) && !PreviousKeyState.IsKeyDown(Keys.LeftControl))
+            if (KeyPressed(Keys.Up) || KeyPressed(Keys.X))
             {
                 Piece.RotateCW();
                 if (Board.Collides(Piece.Blocks()))
@@ -214,7 +214,7 @@ namespace Fib
                 }
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.LeftAlt) && !PreviousKeyState.IsKeyDown(Keys.LeftAlt))
+            if (KeyPressed(Keys.LeftControl) || KeyPressed(Keys.Z))
             {
                 Piece.RotateCCW();
                 if (Board.Collides(Piece.Blocks()))
@@ -223,12 +223,12 @@ namespace Fib
                 }
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.Space) && !PreviousKeyState.IsKeyDown(Keys.Space))
+            if (KeyPressed(Keys.Space) || KeyPressed(Keys.NumPad8))
             {
                 Piece.Drop();
             }
 
-            if (CurrentKeyState.IsKeyDown(Keys.Down))
+            if (CurrentKeyState.IsKeyDown(Keys.Down) || CurrentKeyState.IsKeyDown(Keys.NumPad2))
             {
                 Piece.SoftDrop();
             }
@@ -264,6 +264,15 @@ namespace Fib
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        public bool KeyPressed(Keys Key)
+        {
+            if (CurrentKeyState.IsKeyDown(Key) && !PreviousKeyState.IsKeyDown(Key))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
