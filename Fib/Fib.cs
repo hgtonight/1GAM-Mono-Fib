@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
@@ -21,6 +22,7 @@ namespace Fib
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
         SpriteFont Font;
+        SoundEffect MoveLR, March, RotateLR, MoveDenied, RotateDenied, BlockLock, LineRemoval, Drop, Hold;
         KeyboardState CurrentKeyState, PreviousKeyState;
         Board Board;
         Tetromino Piece, GhostPiece, PreviewPiece;
@@ -68,6 +70,17 @@ namespace Fib
             spriteBatch = new SpriteBatch(GraphicsDevice);
             TileSheet = Content.Load<Texture2D>("tiles");
             Font = Content.Load<SpriteFont>("PressStart2P");
+
+            // Load up sound effects
+            MoveLR = Content.Load<SoundEffect>("move");
+            March = Content.Load<SoundEffect>("march");
+            RotateLR = Content.Load<SoundEffect>("rotate");
+            MoveDenied = Content.Load<SoundEffect>("cantmove");
+            RotateDenied = Content.Load<SoundEffect>("cantrotate");
+            BlockLock = Content.Load<SoundEffect>("lockdatblock");
+            LineRemoval = Content.Load<SoundEffect>("removeline");
+            Drop = Content.Load<SoundEffect>("dropdatblock");
+            Hold = Content.Load<SoundEffect>("hold");
 
             // Set up static members of tetrominos
             Tetromino.TileSheet = TileSheet;
@@ -141,6 +154,7 @@ namespace Fib
             {
                 Piece.Retreat();
                 Board.Consume(Piece.Blocks());
+                BlockLock.Play();
                 Piece = PreviewPiece;
                 PreviewPiece = Tetromino.NextPiece();
                 switch (Board.RemoveCompletedLines())
@@ -148,18 +162,22 @@ namespace Fib
                     case 4:
                         Score += 1200 * (Level + 1);
                         LinesCleared += 4;
+                        LineRemoval.Play();
                         break;
                     case 3:
                         Score += 300 * (Level + 1);
                         LinesCleared += 3;
+                        LineRemoval.Play();
                         break;
                     case 2:
                         Score += 100 * (Level + 1);
                         LinesCleared += 2;
+                        LineRemoval.Play();
                         break;
                     case 1:
                         Score += 40 * (Level + 1);
                         LinesCleared += 1;
+                        LineRemoval.Play();
                         break;
                     default:
                     case 0:
@@ -225,6 +243,11 @@ namespace Fib
                 if (Board.Collides(Piece.Blocks()))
                 {
                     Piece.MoveRight();
+                    MoveDenied.Play();
+                }
+                else
+                {
+                    MoveLR.Play();
                 }
             }
 
@@ -234,6 +257,11 @@ namespace Fib
                 if (Board.Collides(Piece.Blocks()))
                 {
                     Piece.MoveLeft();
+                    MoveDenied.Play();
+                }
+                else
+                {
+                    MoveLR.Play();
                 }
             }
 
@@ -243,6 +271,11 @@ namespace Fib
                 if (Board.Collides(Piece.Blocks()))
                 {
                     Piece.RotateCCW();
+                    RotateDenied.Play();
+                }
+                else
+                {
+                    RotateLR.Play();
                 }
             }
 
@@ -252,17 +285,24 @@ namespace Fib
                 if (Board.Collides(Piece.Blocks()))
                 {
                     Piece.RotateCW();
+                    RotateDenied.Play();
+                }
+                else
+                {
+                    RotateLR.Play();
                 }
             }
 
             if (KeyPressed(Keys.Space) || KeyPressed(Keys.NumPad8))
             {
                 Piece.Drop();
+                Drop.Play();
             }
 
             if (CurrentKeyState.IsKeyDown(Keys.Down) || CurrentKeyState.IsKeyDown(Keys.NumPad2))
             {
                 Piece.SoftDrop();
+                Drop.Play();
             }
 
             PreviousKeyState = CurrentKeyState;
