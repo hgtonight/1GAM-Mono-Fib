@@ -302,7 +302,6 @@ namespace Fib
             if (CurrentKeyState.IsKeyDown(Keys.Down) || CurrentKeyState.IsKeyDown(Keys.NumPad2))
             {
                 Piece.SoftDrop();
-                Drop.Play();
             }
 
             PreviousKeyState = CurrentKeyState;
