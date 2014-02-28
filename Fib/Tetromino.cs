@@ -69,6 +69,16 @@ namespace Fib
             }
         }
 
+        public void ResetPiece()
+        {
+            HardFastFall = false;
+            SoftFastFall = false;
+            Falling = true;
+            RotationState = 0;
+            RotationState = 0;
+            BoardPosition = new Vector2(4, -3);
+        }
+
         public void Position(Vector2 Position)
         {
             BoardPosition.X = Position.X;

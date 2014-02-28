@@ -93,7 +93,12 @@ namespace Fib
 
         public Vector2 PreviewPosition()
         {
-            return new Vector2(Offset.X + (GridSize.X * GridSize.Z), Offset.Y + (GridSize.Y * GridSize.Z));
+            return new Vector2(Offset.X + (GridSize.X * GridSize.Z), Offset.Y + ((GridSize.Y - 7) * GridSize.Z));
+        }
+
+        public Vector2 HoldPosition()
+        {
+            return new Vector2(Offset.X + (GridSize.X * GridSize.Z), Offset.Y + ((GridSize.Y - 1) * GridSize.Z));
         }
 
         public int RemoveCompletedLines()

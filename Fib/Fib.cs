@@ -25,10 +25,10 @@ namespace Fib
         SoundEffect MoveLR, March, RotateLR, MoveDenied, RotateDenied, BlockLock, LineRemoval, Drop, Hold;
         KeyboardState CurrentKeyState, PreviousKeyState;
         Board Board;
-        Tetromino Piece, GhostPiece, PreviewPiece;
+        Tetromino Piece, GhostPiece, PreviewPiece, HeldPiece, TempPiece;
         Tetromino[] StatPieces;
         int GameSpeed, Score, Level, LinesCleared;
-        bool GameOver;
+        bool GameOver, CanSwapHeldPiece;
 
         public Fib()
             : base()
@@ -45,6 +45,9 @@ namespace Fib
             Piece = Tetromino.NextPiece();
             GhostPiece = Piece.Tracer();
             PreviewPiece = Tetromino.NextPiece();
+            HeldPiece = null;
+            TempPiece = null;
+            CanSwapHeldPiece = true;
         }
 
         /// <summary>
@@ -157,6 +160,7 @@ namespace Fib
                 BlockLock.Play();
                 Piece = PreviewPiece;
                 PreviewPiece = Tetromino.NextPiece();
+                CanSwapHeldPiece = true;
                 switch (Board.RemoveCompletedLines())
                 {
                     case 4:
@@ -235,6 +239,7 @@ namespace Fib
             if (KeyPressed(Keys.Escape) || KeyPressed(Keys.P) || KeyPressed(Keys.F1))
             {
                 // Pause in the future
+                Exit();
             }
 
             if (KeyPressed(Keys.Left) || KeyPressed(Keys.NumPad4))
@@ -265,7 +270,7 @@ namespace Fib
                 }
             }
 
-            if (KeyPressed(Keys.Up) || KeyPressed(Keys.X))
+            if (KeyPressed(Keys.Up) || KeyPressed(Keys.X) || KeyPressed(Keys.NumPad1) || KeyPressed(Keys.NumPad5) || KeyPressed(Keys.NumPad9))
             {
                 Piece.RotateCW();
                 if (Board.Collides(Piece.Blocks()))
@@ -279,7 +284,7 @@ namespace Fib
                 }
             }
 
-            if (KeyPressed(Keys.LeftControl) || KeyPressed(Keys.Z))
+            if (KeyPressed(Keys.LeftControl) || KeyPressed(Keys.Z) || KeyPressed(Keys.NumPad3) || KeyPressed(Keys.NumPad7))
             {
                 Piece.RotateCCW();
                 if (Board.Collides(Piece.Blocks()))
@@ -304,7 +309,36 @@ namespace Fib
                 Piece.SoftDrop();
             }
 
+            if(KeyPressed(Keys.LeftShift) || KeyPressed(Keys.C) || KeyPressed(Keys.NumPad0)) {
+                if(CanSwapHeldPiece) {
+                    CanSwapHeldPiece = false;
+                    SwapHeldPiece();
+                    Hold.Play();
+                }
+                else {
+                    MoveDenied.Play();
+                }
+            }
+
             PreviousKeyState = CurrentKeyState;
+        }
+
+        private void SwapHeldPiece()
+        {
+            TempPiece = Piece;
+
+            if (HeldPiece != null)
+            {
+                Piece = HeldPiece;
+            }
+            else
+            {
+                Piece = PreviewPiece;
+                PreviewPiece = Tetromino.NextPiece();
+            }
+
+            HeldPiece = TempPiece;
+            HeldPiece.ResetPiece();
         }
 
         /// <summary>
@@ -321,6 +355,11 @@ namespace Fib
             GhostPiece.Draw(gameTime, spriteBatch, Board.Position());
             Piece.Draw(gameTime, spriteBatch, Board.Position());
             PreviewPiece.Draw(gameTime, spriteBatch, Board.PreviewPosition());
+
+            if (HeldPiece != null)
+            {
+                HeldPiece.Draw(gameTime, spriteBatch, Board.HoldPosition());
+            }
 
             DrawHud();
             DrawTetrominoStats(gameTime);
@@ -340,6 +379,9 @@ namespace Fib
 
             spriteBatch.DrawString(Font, "Level", new Vector2(380, 132), Color.White);
             spriteBatch.DrawString(Font, Level.ToString(), new Vector2(512 - Font.MeasureString(Level.ToString()).X, 152), Color.White);
+
+            spriteBatch.DrawString(Font, "Next", new Vector2(380, Board.PreviewPosition().Y - 48), Color.White);
+            spriteBatch.DrawString(Font, "Hold", new Vector2(380, Board.HoldPosition().Y - 48), Color.White);
         }
 
         private void DrawTetrominoStats(GameTime gameTime)
