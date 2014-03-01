@@ -153,25 +153,18 @@ namespace Fib
                 default:
                 case 0:
                     return Tetromino.I();
-                    break;
                 case 1:
                     return Tetromino.O();
-                    break;
                 case 2:
                     return Tetromino.T();
-                    break;
                 case 3:
                     return Tetromino.J();
-                    break;
                 case 4:
                     return Tetromino.L();
-                    break;
                 case 5:
                     return Tetromino.S();
-                    break;
                 case 6:
                     return Tetromino.Z();
-                    break;
             }
             
         }
@@ -399,6 +392,14 @@ namespace Fib
             List[6] = Tetromino.Z();
 
             return List;
+        }
+
+        public static void ResetStats()
+        {
+            for (int i = 0; i < Stats.Count(); i++)
+            {
+                Stats[i] = 0;
+            }
         }
     }
 }

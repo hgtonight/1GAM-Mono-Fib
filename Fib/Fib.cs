@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Storage;
@@ -24,12 +25,13 @@ namespace Fib
         Texture2D TileSheet;
         SpriteFont Font;
         SoundEffect MoveLR, March, RotateLR, MoveDenied, RotateDenied, BlockLock, LineRemoval, Drop, Hold;
+        Song FullTypeA, LoopTypeA;
         KeyboardState CurrentKeyState, PreviousKeyState;
         Board Board;
         Tetromino Piece, GhostPiece, PreviewPiece, HeldPiece, TempPiece;
         Tetromino[] StatPieces;
         int GameSpeed, Score, Level, LinesCleared;
-        bool GameOver, CanSwapHeldPiece;
+        bool CanSwapHeldPiece;
         GameState State;
 
         public Fib()
@@ -37,12 +39,16 @@ namespace Fib
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            ResetGame();
+        }
+
+        public void ResetGame() {
+            Tetromino.ResetStats();
             Board = new Board(new Vector2(180, 32));
             Score = 0;
             LinesCleared = 0;
             Level = 0;
             GameSpeed = CalculateGameSpeed(Level);
-            GameOver = false;
             StatPieces = Tetromino.PieceList();
             Piece = Tetromino.NextPiece();
             GhostPiece = Piece.Tracer();
@@ -88,6 +94,10 @@ namespace Fib
             Drop = Content.Load<SoundEffect>("dropdatblock");
             Hold = Content.Load<SoundEffect>("hold");
 
+            // Load up background music
+            FullTypeA = Content.Load<Song>("TypeAFinal");
+            LoopTypeA = Content.Load<Song>("TypeALoop");
+
             // Set up static members of tetrominos
             Tetromino.TileSheet = TileSheet;
             Tetromino.TileSize = 16;
@@ -115,8 +125,10 @@ namespace Fib
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            HandleBgMusic();
             CurrentKeyState = Keyboard.GetState();
-            switch(State) {
+            switch (State)
+            {
                 case GameState.Active:
                     HandleGameInput();
                     StepGameLogic();
@@ -124,12 +136,27 @@ namespace Fib
                     break;
                 default:
                 case GameState.GameOver:
+                    HandleEndGameInput();
+                    break;
                 case GameState.Paused:
                     HandlePauseInput();
                     break;
             }
             PreviousKeyState = CurrentKeyState;
             base.Update(gameTime);
+        }
+
+        private void HandleBgMusic()
+        {
+            if (Score == 0 && MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(FullTypeA);
+            }
+            if (MediaPlayer.State == MediaState.Stopped)
+            {
+                MediaPlayer.Play(LoopTypeA);
+                MediaPlayer.IsRepeating = true;
+            }
         }
 
         private void CheckForGameEnd()
@@ -319,6 +346,20 @@ namespace Fib
             }
         }
 
+        private void HandleEndGameInput()
+        {
+            if (KeyPressed(Keys.Space))
+            {
+                ResetGame();
+                State = GameState.Active;
+            }
+
+            if (KeyPressed(Keys.Escape))
+            {
+                Exit();
+            }
+        }
+
         private void HandlePauseInput()
         {
             if (KeyPressed(Keys.Space))
@@ -360,23 +401,41 @@ namespace Fib
 
             spriteBatch.Begin();
 
-            RenderGameState(gameTime);
             switch (State)
             {
                 case GameState.Paused:
-                    // overwrite board with pause message
+                    PauseMessage(gameTime);
                     break;
                 case GameState.GameOver:
-                    // Show game over screen
+                    GameOverMessage(gameTime);
                     break;
                 default:
                 case GameState.Active:
+                    RenderGameState(gameTime);
                     break;
             }
 
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void PauseMessage(GameTime gameTime)
+        {
+            DrawHud();
+            spriteBatch.DrawString(Font, "PAUSED", new Vector2(50, 32), Color.White);
+            spriteBatch.DrawString(Font, "space to", new Vector2(50, 142), Color.White);
+            spriteBatch.DrawString(Font, "continue", new Vector2(50, 162), Color.White);
+            spriteBatch.DrawString(Font, "esc to quit", new Vector2(50, 82), Color.White);
+        }
+
+        private void GameOverMessage(GameTime gameTime)
+        {
+            DrawHud();
+            spriteBatch.DrawString(Font, "GAME OVER", new Vector2(50, 32), Color.White);
+            spriteBatch.DrawString(Font, "space to", new Vector2(50, 142), Color.White);
+            spriteBatch.DrawString(Font, "start a new game", new Vector2(50, 162), Color.White);
+            spriteBatch.DrawString(Font, "esc to quit", new Vector2(50, 82), Color.White);
         }
 
         private void RenderGameState(GameTime gameTime)
