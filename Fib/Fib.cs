@@ -18,6 +18,7 @@ namespace Fib
     public class Fib : Game
     {
         static int Ticks = 0;
+        enum GameState { Paused, GameOver, Active };
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D TileSheet;
@@ -29,6 +30,7 @@ namespace Fib
         Tetromino[] StatPieces;
         int GameSpeed, Score, Level, LinesCleared;
         bool GameOver, CanSwapHeldPiece;
+        GameState State;
 
         public Fib()
             : base()
@@ -48,6 +50,7 @@ namespace Fib
             HeldPiece = null;
             TempPiece = null;
             CanSwapHeldPiece = true;
+            State = GameState.Paused;
         }
 
         /// <summary>
@@ -112,17 +115,20 @@ namespace Fib
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GameOver)
-            {
-                HandleMenuInput();
+            CurrentKeyState = Keyboard.GetState();
+            switch(State) {
+                case GameState.Active:
+                    HandleGameInput();
+                    StepGameLogic();
+                    CheckForGameEnd();
+                    break;
+                default:
+                case GameState.GameOver:
+                case GameState.Paused:
+                    HandlePauseInput();
+                    break;
             }
-            else
-            {
-                HandleUserInput();
-                UpdateGameState();
-                CheckForGameEnd();
-            }
-
+            PreviousKeyState = CurrentKeyState;
             base.Update(gameTime);
         }
 
@@ -130,11 +136,11 @@ namespace Fib
         {
             if (Board.IsFull())
             {
-                GameOver = true;
+                State = GameState.GameOver;
             }
         }
 
-        private void UpdateGameState()
+        private void StepGameLogic()
         {
             bool FastFall = Piece.FastFalling();
             Ticks++;
@@ -227,19 +233,11 @@ namespace Fib
             }
         }
 
-        private void HandleMenuInput()
+        private void HandleGameInput()
         {
-            throw new NotImplementedException();
-        }
-
-        private void HandleUserInput()
-        {
-            CurrentKeyState = Keyboard.GetState();
-
             if (KeyPressed(Keys.Escape) || KeyPressed(Keys.P) || KeyPressed(Keys.F1))
             {
-                // Pause in the future
-                Exit();
+                State = GameState.Paused;
             }
 
             if (KeyPressed(Keys.Left) || KeyPressed(Keys.NumPad4))
@@ -319,8 +317,19 @@ namespace Fib
                     MoveDenied.Play();
                 }
             }
+        }
 
-            PreviousKeyState = CurrentKeyState;
+        private void HandlePauseInput()
+        {
+            if (KeyPressed(Keys.Space))
+            {
+                State = GameState.Active;
+            }
+
+            if (KeyPressed(Keys.Escape))
+            {
+                Exit();
+            }
         }
 
         private void SwapHeldPiece()
@@ -350,6 +359,28 @@ namespace Fib
             GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
+
+            RenderGameState(gameTime);
+            switch (State)
+            {
+                case GameState.Paused:
+                    // overwrite board with pause message
+                    break;
+                case GameState.GameOver:
+                    // Show game over screen
+                    break;
+                default:
+                case GameState.Active:
+                    break;
+            }
+
+            spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        private void RenderGameState(GameTime gameTime)
+        {
             Board.Draw(gameTime, spriteBatch);
 
             GhostPiece.Draw(gameTime, spriteBatch, Board.Position());
@@ -363,10 +394,6 @@ namespace Fib
 
             DrawHud();
             DrawTetrominoStats(gameTime);
-
-            spriteBatch.End();
-
-            base.Draw(gameTime);
         }
 
         private void DrawHud()
